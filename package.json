@@ -1,0 +1,25 @@
+{
+  "name": "datatable",
+  "version": "1.0.0",
+  "description": "DataTable para conjunto de datos reducidos",
+  "main": "dataTable.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pacoman202/DataTable.git"
+  },
+  "keywords": [
+    "DataTable"
+  ],
+  "author": "DANI ARANGO",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pacoman202/DataTable/issues"
+  },
+  "homepage": "https://github.com/pacoman202/DataTable#readme",
+  "dependencies": {
+    "jquery": "^3.7.1"
+  }
+}

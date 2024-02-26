@@ -1,30 +1,61 @@
 class DataTable {
     constructor(id) {
         this.id = id
+        this.header = $(`${id} thead`).html().split('<tr>').map(data => '<tr>' + data).slice(1)
+        this.body = $(`${id} tbody`).html().split('<tr>').map(data => '<tr>' + data)
+        $(`${id}`).wrap('<div class="containerDataTable">')
+        $(`${id}`).addClass('dataTable')
+
+        $(`.containerDataTable`).prepend(this.generarSelect())
+
+        $('html').on('click', '.buttonDataTable', this.cantPags)
+        $('html').on('change', '.selectDataTable', this.cantPags)
+
+        this.cantPags()
     }
 
-    crearDataTable() {
-        datos = document.getElementById('tbody').innerHTML.split('<tr>').map(data => '<tr>' + data)
-        datos.splice(0, 1)
-        limite = 2
-        datosPaginados = []
-        datos.forEach((data, index) => {
-            if (index % limite === 0) {
-                datosPaginados.push([])
+    generarSelect() {
+        const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        let select = '<select class="selectDataTable" value="5">'
+        nums.forEach(data => select += `<option value="${data}">${data}</option>`)
+        return select + "</select>"
+    }
+
+    cantPags = () => {
+        const cant = parseInt($('.selectDataTable').val())
+        this.datosPaginados = []
+        this.body.slice(1).forEach((data, index) => {
+            if (index % cant === 0) {
+                this.datosPaginados.push([])
             }
-            datosPaginados[Math.floor(index / limite)].push(data)
+            this.datosPaginados[Math.floor(index / cant)].push(data)
         })
-        document.getElementById('tbody').innerHTML = datosPaginados[0].join('')
+        this.crearBotones()
+        this.cambiarPagina(0)
+    }
 
-        divButtons = document.getElementById('buttonsDataTable')
-        datosPaginados.forEach((data, index) => {
-            divButtons.innerHTML += '<button onclick="paginar(' + index + ')">' + (index + 1) + '</button>'
+    cambiarPagina() {
+        const numPag = $('.buttonDataTable').html()
+        if (numPag === "<<") $(`${this.id} tbody`).html(this.datosPaginados[0])
+        else if (numPag === ">>") $(`${this.id} tbody`).html(this.datosPaginados[this.datosPaginados.length - 1])
+        else $(`${this.id} tbody`).html(this.datosPaginados[numPag])
+    }
+
+    crearBotones() {
+        if (!$('.buttonsDataTable').html()) $(`.containerDataTable`).append('<div class="buttonsDataTable">')
+        $('.buttonsDataTable').html('')
+        Object.keys(this.datosPaginados).forEach((data, index) => {
+            $('.buttonsDataTable').append('<button class="buttonDataTable">' + (index + 1) + '</button>')
         })
     }
-    
-    paginar(pag) {
-        document.getElementById('tbody').innerHTML = datosPaginados[pag].join('')
+
+    mostrarEnRango(rango, actual) {
+        const start = Math.max(1, actual - rango);
+        const end = Math.min(data.length, actual + rango);
+        const res = data.slice(start - 1, end);
+
+        if (res[0] !== 1) res.unshift('<<');
+        if (res[res.length - 1] !== data[data.length - 1]) res.push('>>');
+        return res
     }
 }
-
-
