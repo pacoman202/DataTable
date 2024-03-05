@@ -8,8 +8,10 @@ class DataTable {
 
         $(`.containerDataTable`).prepend(this.generarSelect())
 
-        $('html').on('click', '.buttonDataTable', this.cantPags)
-        $('html').on('change', '.selectDataTable', this.cantPags)
+        $('html').on('click', '.buttonDataTable', this.cambiarPagina)
+        $('html').on('change', '.selectDataTable', () => {
+            this.cantPags($(this).val())
+        })
 
         this.cantPags()
     }
@@ -34,8 +36,8 @@ class DataTable {
         this.cambiarPagina(0)
     }
 
-    cambiarPagina() {
-        const numPag = $('.buttonDataTable').html()
+    cambiarPagina = (num) => {
+        const numPag = $(num).html()
         if (numPag === "<<") $(`${this.id} tbody`).html(this.datosPaginados[0])
         else if (numPag === ">>") $(`${this.id} tbody`).html(this.datosPaginados[this.datosPaginados.length - 1])
         else $(`${this.id} tbody`).html(this.datosPaginados[numPag])
