@@ -46,3 +46,8 @@
   padding: 5px;
   width: 30px;
 }
+
+
+.buttonsDataTable .pagActual {
+  background-color: #808080;
+}
