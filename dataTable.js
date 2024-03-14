@@ -7,7 +7,7 @@ class DataTable {
         this.inicializarEstructura();
 
         if (cantContent < 0) return;
-        this.renderizarTabla();
+        this.cambiarPagina();
     }
 
     obtenerContenido() {
@@ -36,47 +36,28 @@ class DataTable {
         $(`.containerDataTable`).prepend(this.generarSelect());
         $(`.containerDataTable`).prepend('<div>Buscar:<input type="text" class="searchDataTable"></div>');
 
-        // Evento de cambio de pagina
         $('html').on('click', '.buttonDataTable', function (event) {
             this.cambiarPagina(parseInt($(event.target).attr('pag')));
         }.bind(this));
 
-        // Evento de input para la busqueda de datos
-        $('html').on('change', '.selectDataTable', this.renderizarTabla);
+        $('html').on('change', '.selectDataTable', this.cambiarPagina);
 
-        // Evento de cambio de pagina
         $('html').on('input', '.searchDataTable', function (event) {
-            this.buscar($(event.target).val());
+            this.cambiarPagina();
         }.bind(this));
     }
 
-    renderizarTabla() {
-        this.crearBotones();
-        this.cambiarPagina();
-    }
-
     generarSelect() {
-        const nums = [1, 5, 10, 25, 50, 100];
-        let select = '<select class="selectDataTable" value="5">';
+        const nums = [5, 10, 25, 50, 100];
+        let select = '<select class="selectDataTable">';
         nums.forEach(data => select += `<option value="${data}">${data}</option>`);
         return select + "</select>";
     }
 
-    crearBotones(pagActual = 0) {
-        let botones = [];
-        this.content[0].body.forEach((data, index) => {
-            botones.push(`<button pag="${index}" class="buttonDataTable 
-            ${(pagActual === index) ? 'pagActual' : ''}">${index + 1}</button>`);
-        })
-
-        $('.buttonsDataTable').html(this.mostrarEnRango(pagActual, botones).join(' '));
-    }
-
-    paginarDatos = (pagActual = 0) => {
+    paginarDatos = (pagActual = 0, content) => {
         const cant = parseInt($('.selectDataTable').val())
         const punto = pagActual * cant;
-        const data = this.content.map(data => data.body.slice(punto, punto + cant));
-
+        const data = content.map(data => data.body.slice(punto, punto + cant));
         let res = ""
         for (let i = 0; i < data[0].length; i++) {
             res += '<tr>';
@@ -89,8 +70,19 @@ class DataTable {
     }
 
     cambiarPagina = (numPag = 0) => {
-        $(`${this.id} tbody`).html(this.paginarDatos(numPag));
-        this.crearBotones(numPag);
+        const content = this.buscar();
+        $(`${this.id} tbody`).html(this.paginarDatos(numPag, content));
+        this.crearBotones(numPag, content);
+    }
+
+    crearBotones(pagActual = 0, content) {
+        let botones = [];
+        const length = Math.ceil(content[0].body.length / parseInt($('.selectDataTable').val()))
+        for (let index = 0; index < length; index++) {
+            botones.push(`<button pag="${index}" class="buttonDataTable 
+            ${(pagActual === index) ? 'pagActual' : ''}">${index + 1}</button>`);
+        }
+        $('.buttonsDataTable').html(this.mostrarEnRango(pagActual, botones).join(' '));
     }
 
     mostrarEnRango(pagActual, data) {
@@ -104,11 +96,11 @@ class DataTable {
             fin = Math.min(dataLength, fin + 1);
         }
 
-        // data = data.slice(inicio, fin + 1);
-        data = data.filter((boton, index) => index >= inicio && index <= fin);
-        // console.log(data);
+        data = data.slice(inicio, fin + 1);
+
         data.unshift(this.desplazarIzquierda(pagActual));
         data.push(this.desplazarDerecha(pagActual, dataLength));
+
         return data;
     }
 
@@ -119,4 +111,26 @@ class DataTable {
     desplazarDerecha(pagActual, dataLength) {
         return `<button pag="${dataLength}" ${(pagActual === dataLength) ? 'disabled' : ''} class="buttonDataTable">>></button>`;
     }
+
+    buscar() {
+        const input = $('.searchDataTable').val();
+        return input === '' ? this.content : this.content.map((data, dataIndex) => {
+            const filteredRows = data.body.filter((row, rowIndex) => {
+                // Verificar si otras filas en el mismo índice de otros elementos también contienen el input
+                for (let i = 0; i < this.content.length; i++) {
+                    if (this.content[i].body[rowIndex].includes(input)) {
+                        return true; // Si se encuentra en otra fila del mismo índice, devolver verdadero
+                    }
+                }
+
+                return false; // Si no se encuentra en ninguna otra fila, devolver falso
+            });
+
+            return {
+                head: data.head,
+                body: filteredRows
+            };
+        });
+    }
+
 }
