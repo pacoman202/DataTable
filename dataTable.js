@@ -2,62 +2,89 @@ class DataTable {
     constructor(id) {
         this.id = id
         this.header = $(`${id} thead`).html().split('<tr>').map(data => '<tr>' + data).slice(1)
-        this.body = $(`${id} tbody`).html().split('<tr>').map(data => '<tr>' + data)
-        $(`${id}`).wrap('<div class="containerDataTable">')
-        $(`${id}`).addClass('dataTable')
+        this.body = $(`${id} tbody`).html().split('<tr>').map(data => '<tr>' + data).slice(1)
 
+        this.inicializarEstructura()
+    }
+
+    inicializarEstructura() {
+        $(`${this.id}`).wrap('<div class="containerDataTable">')
+        $(`${this.id}`).addClass('dataTable')
+
+        $(`.containerDataTable`).append('<div class="buttonsDataTable">')
         $(`.containerDataTable`).prepend(this.generarSelect())
 
-        $('html').on('click', '.buttonDataTable', this.cambiarPagina)
-        $('html').on('change', '.selectDataTable', () => {
-            this.cantPags($(this).val())
-        })
+        $('html').on('click', '.buttonDataTable', function (event) {
+            this.cambiarPagina($(event.target).attr('pag'))
+        }.bind(this))
 
-        this.cantPags()
+        $('html').on('change', '.selectDataTable', this.paginarDatos)
+
+        this.paginarDatos()
     }
 
     generarSelect() {
-        const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        const nums = [1, 5, 10, 25, 50, 100]
         let select = '<select class="selectDataTable" value="5">'
         nums.forEach(data => select += `<option value="${data}">${data}</option>`)
         return select + "</select>"
     }
 
-    cantPags = () => {
+    paginarDatos = () => {
         const cant = parseInt($('.selectDataTable').val())
+
         this.datosPaginados = []
-        this.body.slice(1).forEach((data, index) => {
+        this.body.forEach((data, index) => {
             if (index % cant === 0) {
                 this.datosPaginados.push([])
             }
             this.datosPaginados[Math.floor(index / cant)].push(data)
         })
+
         this.crearBotones()
         this.cambiarPagina(0)
     }
 
-    cambiarPagina = (num) => {
-        const numPag = $(num).html()
-        if (numPag === "<<") $(`${this.id} tbody`).html(this.datosPaginados[0])
-        else if (numPag === ">>") $(`${this.id} tbody`).html(this.datosPaginados[this.datosPaginados.length - 1])
-        else $(`${this.id} tbody`).html(this.datosPaginados[numPag])
+    cambiarPagina = (data) => {
+        $(`${this.id} tbody`).html(this.datosPaginados[data])
+        this.crearBotones(data)
     }
 
-    crearBotones() {
-        if (!$('.buttonsDataTable').html()) $(`.containerDataTable`).append('<div class="buttonsDataTable">')
-        $('.buttonsDataTable').html('')
-        Object.keys(this.datosPaginados).forEach((data, index) => {
-            $('.buttonsDataTable').append('<button class="buttonDataTable">' + (index + 1) + '</button>')
+    crearBotones(pagActual = 0) {
+        let botones = []
+
+        this.datosPaginados.forEach((data, index) => {
+            botones.push(`<button pag="${index}" class="buttonDataTable">${index + 1}</button>`)
         })
+        botones = this.mostrarEnRango(parseInt(pagActual), botones)
+
+
+        $('.buttonsDataTable').html(botones.join(' '))
     }
 
-    mostrarEnRango(rango, actual) {
-        const start = Math.max(1, actual - rango);
-        const end = Math.min(data.length, actual + rango);
-        const res = data.slice(start - 1, end);
+    mostrarEnRango(pagActual, data) {
+        const rango = 2;
+        const dataLength = data.length - 1;
+        let inicio = Math.max(0, pagActual - rango);
+        let fin = Math.min(dataLength, pagActual + rango);
 
-        if (res[0] !== 1) res.unshift('<<');
-        if (res[res.length - 1] !== data[data.length - 1]) res.push('>>');
-        return res
+        while ((fin - inicio + 1) < 5 && (inicio > 0 || fin < dataLength)) {
+            inicio = Math.max(0, inicio - 1);
+            fin = Math.min(dataLength, fin + 1);
+        }
+
+        data = data.filter((boton, index) => index >= inicio && index <= fin);
+
+        data.unshift(this.desplazarIzquierda(pagActual))
+        data.push(this.desplazarDerecha(pagActual, dataLength))
+        return data
+    }
+
+    desplazarIzquierda(pagActual) {
+        return `<button pag="0" ${(pagActual === 0) ? 'disabled' : ''} class="buttonDataTable"><<</button>`
+    }
+
+    desplazarDerecha(pagActual, dataLength) {
+        return `<button pag="${dataLength}" ${(pagActual === dataLength) ? 'disabled' : ''} class="buttonDataTable">>></button>`
     }
 }
