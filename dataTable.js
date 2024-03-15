@@ -1,10 +1,11 @@
 class DataTable {
-    constructor(id) {
+    constructor(id, theme = 'td-gray-theme') {
         this.id = id;
         const { content, cantContent } = this.obtenerContenido();
         this.content = content;
         this.cantContent = cantContent;
-        this.inicializarEstructura();
+        this.filteredColumn = '';
+        this.inicializarEstructura(theme);
 
         if (cantContent < 0) return;
         this.cambiarPagina();
@@ -28,8 +29,8 @@ class DataTable {
         return { content, cantContent };
     }
 
-    inicializarEstructura() {
-        $(this.id).wrap('<div class="containerDataTable">');
+    inicializarEstructura(theme) {
+        $(this.id).wrap(`<div class="containerDataTable ${theme}">`);
         $(this.id).addClass('dataTable');
 
         $(`.containerDataTable`).append('<div class="buttonsDataTable">');
@@ -43,6 +44,11 @@ class DataTable {
         $('html').on('change', '.selectDataTable', this.cambiarPagina);
 
         $('html').on('input', '.searchDataTable', function (event) {
+            this.cambiarPagina();
+        }.bind(this));
+
+        $('html').on('click', '.dataTable thead th', function (event) {
+            this.filteredColumn = $(event.target).html();
             this.cambiarPagina();
         }.bind(this));
     }
@@ -114,7 +120,7 @@ class DataTable {
 
     buscar() {
         const input = $('.searchDataTable').val();
-        return input === '' ? this.content : this.content.map((data, dataIndex) => {
+        return input === '' ? this.datosFiltrados() : this.datosFiltrados().map((data, dataIndex) => {
             const filteredRows = data.body.filter((row, rowIndex) => {
                 // Verificar si otras filas en el mismo índice de otros elementos también contienen el input
                 for (let i = 0; i < this.content.length; i++) {
@@ -133,4 +139,11 @@ class DataTable {
         });
     }
 
+    datosFiltrados() {
+        if(this.filteredColumn === '') return this.content
+        const index = this.content.findIndex(data => data.head === this.filteredColumn)
+        const copia = JSON.parse(JSON.stringify(this.content))
+        copia[index].body.sort()
+        return copia
+    }
 }

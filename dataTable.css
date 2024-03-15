@@ -1,5 +1,20 @@
+:root {
+  --dt-gray-backgroundColor: #1e1e1e;
+  --dt-gray-btnCurrent: #6b6b6b;
+  --dt-gray-rowTable: #252525;
+  --dt-gray-inputBorder: #555555 1px solid;
+
+  --dt-green-backgroundColor: #185a3d;
+  --dt-green-btnCurrent: #4caf50;
+  --dt-green-rowTable: #2e7d32;
+  --dt-green-inputBorder: #388e3c 1px solid;
+
+  --dt-textBlack: #000000;
+  --dt-textWhite: #ffffff;
+}
 .dataTable {
-  width: 80%;
+  width: 100%;
+  padding-bottom: 14px;
   margin: 0 auto;
 }
 
@@ -8,15 +23,17 @@
 }
 
 .dataTable tbody tr:nth-child(odd) {
-  background-color: #292d31;
+  background-color: var(--td-rowTable);
 }
 
 .dataTable th {
   padding: 14px;
+  font-weight: 1000;
 }
 
 .containerDataTable {
-  background-color: #212529;
+  background-color: var(--td-backgroundColor);
+  color: var(--td-textColor);
   width: 80%;
   padding: 20px;
   border-radius: 3px;
@@ -24,7 +41,8 @@
 
 .containerDataTable select {
   background: transparent;
-  border: #4d5154 1px solid;
+  border: var(--td-inputBorder);
+  color: var(--td-textColor);
   border-radius: 2px;
   font-size: 14px;
   height: 30px;
@@ -39,7 +57,8 @@
 
 .buttonsDataTable button {
   background: transparent;
-  border: #8b8b8b 1px solid;
+  border: var(--td-inputBorder);
+  color: var(--td-textColor);
   border-radius: 5px;
   font-size: 14px;
   height: 30px;
@@ -47,7 +66,22 @@
   width: 30px;
 }
 
-
 .buttonsDataTable .pagActual {
-  background-color: #808080;
+  background-color: var(--td-btnCurrent);
+}
+
+.td-gray-theme {
+  --td-backgroundColor: var(--dt-gray-backgroundColor);
+  --td-btnCurrent: var(--dt-gray-btnCurrent);
+  --td-rowTable: var(--dt-gray-rowTable);
+  --td-inputBorder: var(--dt-gray-inputBorder);
+  --td-textColor: var(--dt-textWhite);
+}
+
+.td-green-theme {
+  --td-backgroundColor: var(--dt-green-backgroundColor);
+  --td-btnCurrent: var(--dt-green-btnCurrent);
+  --td-rowTable: var(--dt-green-rowTable);
+  --td-inputBorder: var(--dt-green-inputBorder);
+  --td-textColor: var(--dt-textWhite);
 }
