@@ -12,6 +12,23 @@
   --dt-textBlack: #000000;
   --dt-textWhite: #ffffff;
 }
+
+.td-gray-theme {
+  --td-backgroundColor: var(--dt-gray-backgroundColor);
+  --td-btnCurrent: var(--dt-gray-btnCurrent);
+  --td-rowTable: var(--dt-gray-rowTable);
+  --td-inputBorder: var(--dt-gray-inputBorder);
+  --td-textColor: var(--dt-textWhite);
+}
+
+.td-green-theme {
+  --td-backgroundColor: var(--dt-green-backgroundColor);
+  --td-btnCurrent: var(--dt-green-btnCurrent);
+  --td-rowTable: var(--dt-green-rowTable);
+  --td-inputBorder: var(--dt-green-inputBorder);
+  --td-textColor: var(--dt-textWhite);
+}
+
 .dataTable {
   width: 100%;
   padding-bottom: 14px;
@@ -26,9 +43,22 @@
   background-color: var(--td-rowTable);
 }
 
-.dataTable th {
+.dataTable thead th {
   padding: 14px;
   font-weight: 1000;
+}
+
+.dataTable thead .up,
+.dataTable thead .down {
+  background-color: var(--td-rowTable);
+}
+
+.dataTable thead .up::after {
+  content: "▲";
+}
+
+.dataTable thead .down::after {
+  content: "▼";
 }
 
 .containerDataTable {
@@ -37,17 +67,33 @@
   width: 80%;
   padding: 20px;
   border-radius: 3px;
+  overflow-x: auto;
 }
 
-.containerDataTable select {
+.containerDataTable .flex select,
+.containerDataTable .flex input {
   background: transparent;
   border: var(--td-inputBorder);
   color: var(--td-textColor);
   border-radius: 2px;
   font-size: 14px;
-  height: 30px;
   padding: 5px;
+}
+
+.containerDataTable .flex select option {
+  background-color: var(--td-backgroundColor);
+}
+
+.containerDataTable .flex select {
+  align-self: flex-start;
   width: 50px;
+  height: 30px;
+}
+
+.containerDataTable .flex input {
+  align-self: flex-end;
+  width: 70%;
+  height: 20px;
 }
 
 .buttonsDataTable {
@@ -66,22 +112,29 @@
   width: 30px;
 }
 
+.buttonsDataTable button:disabled {
+  background-color: rgba(255, 255, 255, 0.1)
+}
+
 .buttonsDataTable .pagActual {
   background-color: var(--td-btnCurrent);
 }
 
-.td-gray-theme {
-  --td-backgroundColor: var(--dt-gray-backgroundColor);
-  --td-btnCurrent: var(--dt-gray-btnCurrent);
-  --td-rowTable: var(--dt-gray-rowTable);
-  --td-inputBorder: var(--dt-gray-inputBorder);
-  --td-textColor: var(--dt-textWhite);
+.containerDataTable .flex {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-.td-green-theme {
-  --td-backgroundColor: var(--dt-green-backgroundColor);
-  --td-btnCurrent: var(--dt-green-btnCurrent);
-  --td-rowTable: var(--dt-green-rowTable);
-  --td-inputBorder: var(--dt-green-inputBorder);
-  --td-textColor: var(--dt-textWhite);
+@media screen and (max-width: 720px) {
+  .containerDataTable .flex {
+    justify-content: center; 
+  }
+
+  .containerDataTable .flex select,
+  .containerDataTable .flex input {
+    width: auto;
+    margin: 10px; 
+  }
 }

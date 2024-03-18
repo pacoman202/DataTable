@@ -1,11 +1,14 @@
 class DataTable {
     constructor(id, theme = 'td-gray-theme') {
         this.id = id;
+        this.idContent = `${id}Content`;
         const { content, cantContent } = this.obtenerContenido();
         this.content = content;
         this.cantContent = cantContent;
         this.filteredColumn = '';
+        this.antFiltered = '.';
         this.inicializarEstructura(theme);
+        this.fnGene = this.fnGeneradora([])
 
         if (cantContent < 0) return;
         this.cambiarPagina();
@@ -13,41 +16,42 @@ class DataTable {
 
     obtenerContenido() {
         const content = [];
-
+        
         $(`${this.id} thead th`).each(function (index) {
             const data = {
                 body: [],
                 head: $(this).text()
             };
-            $(`${this.id} tbody td:nth-child(${index + 1})`).each(function () {
+            $(this).closest('table').find(`tbody td:nth-child(${index + 1})`).each(function () {
                 data.body.push($(this).text());
             });
             content.push(data)
         });
 
         const cantContent = content.length - 1
+        console.log(content);
         return { content, cantContent };
     }
 
     inicializarEstructura(theme) {
-        $(this.id).wrap(`<div class="containerDataTable ${theme}">`);
+        $(this.id).wrap(`<div id="${this.id.substring(1)}Content" class="containerDataTable ${theme}">`);
         $(this.id).addClass('dataTable');
 
-        $(`.containerDataTable`).append('<div class="buttonsDataTable">');
-        $(`.containerDataTable`).prepend(this.generarSelect());
-        $(`.containerDataTable`).prepend('<div>Buscar:<input type="text" class="searchDataTable"></div>');
+        $(this.idContent).append('<div class="buttonsDataTable">');
+        $(this.idContent).prepend();
+        $(this.idContent).prepend(`<div class="flex">${this.generarSelect()}<div>Buscar:<input type="text" class="searchDataTable"></div></div>`);
 
-        $('html').on('click', '.buttonDataTable', function (event) {
+        $('html').on('click', `${this.idContent} .buttonDataTable`, function (event) {
             this.cambiarPagina(parseInt($(event.target).attr('pag')));
         }.bind(this));
 
-        $('html').on('change', '.selectDataTable', this.cambiarPagina);
+        $('html').on('change', `${this.idContent} .selectDataTable`, this.cambiarPagina);
 
-        $('html').on('input', '.searchDataTable', function (event) {
+        $('html').on('input', `${this.idContent} .searchDataTable`, function (event) {
             this.cambiarPagina();
         }.bind(this));
 
-        $('html').on('click', '.dataTable thead th', function (event) {
+        $('html').on('click', `${this.idContent} .dataTable thead th`, function (event) {
             this.filteredColumn = $(event.target).html();
             this.cambiarPagina();
         }.bind(this));
@@ -61,10 +65,10 @@ class DataTable {
     }
 
     paginarDatos = (pagActual = 0, content) => {
-        const cant = parseInt($('.selectDataTable').val())
+        const cant = parseInt($(`${this.idContent} .selectDataTable`).val())
         const punto = pagActual * cant;
         const data = content.map(data => data.body.slice(punto, punto + cant));
-        let res = ""
+        let res = "";
         for (let i = 0; i < data[0].length; i++) {
             res += '<tr>';
             for (let e = 0; e < data.length; e++) {
@@ -83,12 +87,12 @@ class DataTable {
 
     crearBotones(pagActual = 0, content) {
         let botones = [];
-        const length = Math.ceil(content[0].body.length / parseInt($('.selectDataTable').val()))
+        const length = Math.ceil(content[0].body.length / parseInt($(`${this.idContent} .selectDataTable`).val()))
         for (let index = 0; index < length; index++) {
             botones.push(`<button pag="${index}" class="buttonDataTable 
             ${(pagActual === index) ? 'pagActual' : ''}">${index + 1}</button>`);
         }
-        $('.buttonsDataTable').html(this.mostrarEnRango(pagActual, botones).join(' '));
+        $(`${this.idContent} .buttonsDataTable`).html(this.mostrarEnRango(pagActual, botones).join(' '));
     }
 
     mostrarEnRango(pagActual, data) {
@@ -119,19 +123,16 @@ class DataTable {
     }
 
     buscar() {
-        const input = $('.searchDataTable').val();
+        const input = $(`${this.idContent} .searchDataTable`).val();
         return input === '' ? this.datosFiltrados() : this.datosFiltrados().map((data, dataIndex) => {
             const filteredRows = data.body.filter((row, rowIndex) => {
-                // Verificar si otras filas en el mismo índice de otros elementos también contienen el input
                 for (let i = 0; i < this.content.length; i++) {
                     if (this.content[i].body[rowIndex].includes(input)) {
-                        return true; // Si se encuentra en otra fila del mismo índice, devolver verdadero
+                        return true;
                     }
                 }
-
-                return false; // Si no se encuentra en ninguna otra fila, devolver falso
+                return false;
             });
-
             return {
                 head: data.head,
                 body: filteredRows
@@ -140,10 +141,27 @@ class DataTable {
     }
 
     datosFiltrados() {
-        if(this.filteredColumn === '') return this.content
+        if (this.filteredColumn === '') return this.content
         const index = this.content.findIndex(data => data.head === this.filteredColumn)
         const copia = JSON.parse(JSON.stringify(this.content))
-        copia[index].body.sort()
+
+        if (this.antFiltered != this.filteredColumn) this.fnGene = this.fnGeneradora(copia[index].body, index)
+        this.antFiltered = this.filteredColumn
+        copia[index].body = this.fnGene.next().value
+
         return copia
+    }
+
+    *fnGeneradora(data, index = 0) {
+        $(`${this.id} thead .down`).removeClass('down');
+        $(`${this.id} thead .up`).removeClass('up');
+        while (true) {
+            $(`${this.id} thead th:nth-child(${index + 1})`).addClass('up');
+            yield data.slice().sort()
+            $(`${this.id} thead .up`).toggleClass('up down');
+            yield data.slice().sort((a, b) => b.localeCompare(a))
+            $(`${this.id} thead .down`).removeClass('down');
+            yield data
+        }
     }
 }
