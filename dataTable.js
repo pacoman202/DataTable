@@ -16,7 +16,7 @@ class DataTable {
 
     obtenerContenido() {
         const content = [];
-        
+
         $(`${this.id} thead th`).each(function (index) {
             const data = {
                 body: [],
