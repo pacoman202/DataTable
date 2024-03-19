@@ -1,6 +1,6 @@
 # DataTable
 
-Proyecto DataTable realizado con jQuery.
+Proyecto DataTable realizado con jQuery..
 
 Su proposito es que en base a una tabla ya definida alterar su forma y generar un paginador, busqueda instantanea, ordenamiento por columna, diseño responsive y diferentes temas de colores para su visualización.
 
