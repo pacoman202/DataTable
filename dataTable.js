@@ -8,7 +8,8 @@ class DataTable {
         this.filteredColumn = '';
         this.antFiltered = '.';
         this.inicializarEstructura(theme);
-        this.fnGene = this.fnGeneradora([])
+        this.fnGene = this.fnGeneradora([]);
+        this.isFiltred = false;
 
         if (cantContent < 0) return;
         this.cambiarPagina();
@@ -29,7 +30,6 @@ class DataTable {
         });
 
         const cantContent = content.length - 1
-        console.log(content);
         return { content, cantContent };
     }
 
@@ -38,14 +38,15 @@ class DataTable {
         $(this.id).addClass('dataTable');
 
         $(this.idContent).append('<div class="buttonsDataTable">');
-        $(this.idContent).prepend();
         $(this.idContent).prepend(`<div class="flex">${this.generarSelect()}<div>Buscar:<input type="text" class="searchDataTable"></div></div>`);
 
         $('html').on('click', `${this.idContent} .buttonDataTable`, function (event) {
             this.cambiarPagina(parseInt($(event.target).attr('pag')));
         }.bind(this));
 
-        $('html').on('change', `${this.idContent} .selectDataTable`, this.cambiarPagina);
+        $('html').on('change', `${this.idContent} .selectDataTable`, function (event) {
+            this.cambiarPagina();
+        }.bind(this));
 
         $('html').on('input', `${this.idContent} .searchDataTable`, function (event) {
             this.cambiarPagina();
@@ -53,7 +54,9 @@ class DataTable {
 
         $('html').on('click', `${this.idContent} .dataTable thead th`, function (event) {
             this.filteredColumn = $(event.target).html();
+            this.isFiltred = true;
             this.cambiarPagina();
+            this.isFiltred = false;
         }.bind(this));
     }
 
@@ -141,7 +144,7 @@ class DataTable {
     }
 
     datosFiltrados() {
-        if (this.filteredColumn === '') return this.content
+        if (this.filteredColumn === '' || !this.isFiltred) return this.content
         const index = this.content.findIndex(data => data.head === this.filteredColumn)
         const copia = JSON.parse(JSON.stringify(this.content))
 
